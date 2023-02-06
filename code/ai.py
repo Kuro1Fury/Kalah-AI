@@ -91,7 +91,7 @@ class ai:
         # append to time.txt so that you can see running time for all moves.
         f = open('time.txt', 'a')
         # Make sure to clean the file before each of your experiment
-        d = 2
+        d = 6
         f.write('depth = '+str(d)+'\n')
         t_start = time.time()
         a = self.minimax(depth=d)
@@ -163,7 +163,6 @@ class ai:
         if mod == 6:
             return res, True
 
-        print(f"mod {mod}")
         if mod < 6 and oldN < 13 and oldState.a[mod] == 0 and oldState.b[mod] != 0 or oldN == 13:
             # print(
             #     f"oldState.a: {oldState.a}  oldState.b: {oldState.b}  mod: {mod}  oldN: {oldN}")
@@ -178,8 +177,8 @@ class ai:
         return res, False
 
     def Max_Value(self, state, alpha, beta, depth):
-        print(
-            f"Max_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta} depth:{depth}")
+        # print(
+        #     f"Max_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta} depth:{depth}")
         if (self.Terminal_Test(state, depth)):
             # print(
             #     f"Max: a: {state.a} b:{state.b} utility: {self.utility(state, True)}")
@@ -194,7 +193,7 @@ class ai:
                     v = val
                     maxA = a
             else:
-                act, val = self.Max_Value(s, alpha, beta, depth - 1)
+                act, val = self.Max_Value(s, alpha, beta, depth)
                 if val > v:
                     v = val
                     maxA = a
@@ -208,8 +207,8 @@ class ai:
         return maxA, v
 
     def Min_Value(self, state, alpha, beta, depth):
-        print(
-            f"Min_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta} depth:{depth}")
+        # print(
+        #     f"Min_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta} depth:{depth}")
         if (self.Terminal_Test(state, depth)):
             # print(
             #     f"Min: a: {state.a} b:{state.b} utility: {self.utility(state, False)}")
@@ -224,7 +223,7 @@ class ai:
                     v = val
                     maxA = a
             else:
-                act, val = self.Min_Value(s, alpha, beta, depth - 1)
+                act, val = self.Min_Value(s, alpha, beta, depth)
                 if val > v:
                     v = val
                     maxA = a
@@ -262,7 +261,8 @@ class ai:
         if (state.b_fin > 36):
             return -math.inf
 
-        res = sum(state.a) - sum(state.b) + state.a_fin * 2 - state.b_fin * 2
+        res = sum(state.a) - sum(state.b) + \
+            state.a_fin * 100 - state.b_fin * 100
 
         return res
 
@@ -281,5 +281,7 @@ if __name__ == "__main__":
     #       myAI.successorForA(myState)[0][2].b)
 
     #  print(myAI.Min_Value([0, 0, 0, 2, 12, 11], [1, 0, 0, 0, 13, 0], 16, 17))
+
+    # print(myAI.move([0, 13, 0, 0, 0, 0], [11, 12, 2, 0, 0, 0], 17, 17, 1))
 
     print(myAI.move([0, 13, 0, 0, 0, 0], [11, 12, 2, 0, 0, 0], 17, 17, 1))
