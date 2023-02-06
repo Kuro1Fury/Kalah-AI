@@ -219,12 +219,12 @@ class ai:
         for a, isKalah, s in self.successorForB(state):
             if not isKalah:
                 act, val = self.Max_Value(s, alpha, beta, depth - 1)
-                if val > v:
+                if val < v:
                     v = val
                     maxA = a
             else:
                 act, val = self.Min_Value(s, alpha, beta, depth)
-                if val > v:
+                if val < v:
                     v = val
                     maxA = a
 
