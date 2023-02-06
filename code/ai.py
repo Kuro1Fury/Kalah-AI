@@ -190,13 +190,14 @@ class ai:
         for a, isKalah, s in self.successorForA(state):
             if not isKalah:
                 act, val = self.Min_Value(s, alpha, beta, depth - 1)
-                # if val > v:
-                #     v = val
-                #     maxA = a
-                v = max(v, val)
+                if val > v:
+                    v = val
+                    maxA = a
             else:
                 act, val = self.Max_Value(s, alpha, beta, depth - 1)
-                v = max(v, val)
+                if val > v:
+                    v = val
+                    maxA = a
 
             if v >= beta:
                 # print(f"Max a: {a} v:{v} beta:{beta}")
@@ -204,7 +205,7 @@ class ai:
 
             alpha = max(alpha, v)
         # print("return -1")
-        return -1, v
+        return maxA, v
 
     def Min_Value(self, state, alpha, beta, depth):
         print(
@@ -214,14 +215,19 @@ class ai:
             #     f"Min: a: {state.a} b:{state.b} utility: {self.utility(state, False)}")
             return -1, self.utility(state, False)
         v = math.inf
+        maxA = -1
 
         for a, isKalah, s in self.successorForB(state):
             if not isKalah:
                 act, val = self.Max_Value(s, alpha, beta, depth - 1)
-                v = max(v, val)
+                if val > v:
+                    v = val
+                    maxA = a
             else:
                 act, val = self.Min_Value(s, alpha, beta, depth - 1)
-                v = max(v, val)
+                if val > v:
+                    v = val
+                    maxA = a
 
             if v <= alpha:
                 # print(f"Min a: {a} v:{v}")
@@ -229,7 +235,7 @@ class ai:
 
             beta = min(beta, v)
         # print("return -1")
-        return -1, v
+        return maxA, v
 
     def Terminal_Test(self, state: state, depth):
         if (depth == 0):
