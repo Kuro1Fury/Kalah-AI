@@ -97,8 +97,9 @@ class ai:
         a = self.minimax(depth=d)
         f.write(str(time.time()-t_start)+'\n')
         f.close()
-        res = r[a]
-        print(f"a: {a} r[a]: {r[a]} r: {r}")
+        print(f"a: {a} r: {r}")
+        res = a
+
         return res
 
     # calling function
@@ -106,9 +107,10 @@ class ai:
     def minimax(self, depth):
         # example: doing nothing but wait 0.1*depth sec
         a, v = self.Max_Value(self.head, -math.inf, math.inf, depth)
+        # print(f"v: {v}")
         return a
 
-    def successor(self, state: state) -> tuple:
+    def successorForA(self, state: state):
         r = []
         for i in range(6):
             if state.a[i] != 0:
@@ -121,6 +123,21 @@ class ai:
 
         return states
 
+    def successorForB(self, state: state):
+        r = []
+        for i in range(6):
+            if state.b[::-1][i] != 0:
+                r.append(i)
+
+        states = []
+        for i in r:
+            newState, isKalah = self.step(self.state(
+                state.b[::-1], state.a[::-1], state.b_fin, state.a_fin), i)
+            states.append((i, isKalah, self.state(
+                newState.b[::-1], newState.a[::-1], newState.b_fin, newState.a_fin)))
+
+        return states
+
     def step(self, oldState: state, i):
         oldN = oldState.a[i]
         n = oldN
@@ -130,9 +147,10 @@ class ai:
         # print(f"i: {i} n: {n}")
         res.a[i] = 0
         i += 1
-        mod = i % 13
+        mod = -1
 
         while n > 0:
+            mod = i % 13
             if mod == 6:
                 res.a_fin += 1
             elif i % 13 < 6:
@@ -141,11 +159,11 @@ class ai:
                 res.b[12 - (mod)] += 1
             n -= 1
             i += 1
-            mod = i % 13
 
         if mod == 6:
             return res, True
 
+        print(f"mod {mod}")
         if mod < 6 and oldN < 13 and oldState.a[mod] == 0 and oldState.b[mod] != 0 or oldN == 13:
             # print(
             #     f"oldState.a: {oldState.a}  oldState.b: {oldState.b}  mod: {mod}  oldN: {oldN}")
@@ -161,34 +179,43 @@ class ai:
 
     def Max_Value(self, state, alpha, beta, depth):
         print(
-            f"Max_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta}")
+            f"Max_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta} depth:{depth}")
         if (self.Terminal_Test(state, depth)):
+            # print(
+            #     f"Max: a: {state.a} b:{state.b} utility: {self.utility(state, True)}")
             return -1, self.utility(state, True)
         v = -math.inf
+        maxA = -1
 
-        for a, isKalah, s in self.successor(state):
+        for a, isKalah, s in self.successorForA(state):
             if not isKalah:
                 act, val = self.Min_Value(s, alpha, beta, depth - 1)
+                # if val > v:
+                #     v = val
+                #     maxA = a
                 v = max(v, val)
             else:
                 act, val = self.Max_Value(s, alpha, beta, depth - 1)
                 v = max(v, val)
 
             if v >= beta:
+                # print(f"Max a: {a} v:{v} beta:{beta}")
                 return a, v
 
             alpha = max(alpha, v)
-        print("return -1")
+        # print("return -1")
         return -1, v
 
     def Min_Value(self, state, alpha, beta, depth):
         print(
-            f"Min_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta}")
+            f"Min_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta} depth:{depth}")
         if (self.Terminal_Test(state, depth)):
+            # print(
+            #     f"Min: a: {state.a} b:{state.b} utility: {self.utility(state, False)}")
             return -1, self.utility(state, False)
         v = math.inf
 
-        for a, isKalah, s in self.successor(state):
+        for a, isKalah, s in self.successorForB(state):
             if not isKalah:
                 act, val = self.Max_Value(s, alpha, beta, depth - 1)
                 v = max(v, val)
@@ -197,10 +224,11 @@ class ai:
                 v = max(v, val)
 
             if v <= alpha:
+                # print(f"Min a: {a} v:{v}")
                 return a, v
 
             beta = min(beta, v)
-        print("return -1")
+        # print("return -1")
         return -1, v
 
     def Terminal_Test(self, state: state, depth):
@@ -235,10 +263,17 @@ class ai:
 
 if __name__ == "__main__":
     myAI = ai()
-    print(myAI.move([6, 6, 6, 6, 6, 6], [6, 6, 6, 6, 6, 6], 0, 0, 1))
+    # print(myAI.move([0, 1, 0, 2, 12, 11], [1, 0, 2, 0, 13, 0], 16, 14, 1))
     # myState = myAI.state([11, 0, 0, 1, 16, 1], [11, 0, 1, 3, 3, 1], 16, 8)
 
     # successor = myAI.successor(myState)
     # for s in successor:
     #     print(s[2])
-    # print(myAI.successor(myState))
+
+    # myState = myAI.state([0, 13, 0, 0, 0, 0], [11, 12, 2, 0, 0, 0], 17, 17)
+    # print(myAI.successorForA(myState)[0][2].a,
+    #       myAI.successorForA(myState)[0][2].b)
+
+    #  print(myAI.Min_Value([0, 0, 0, 2, 12, 11], [1, 0, 0, 0, 13, 0], 16, 17))
+
+    print(myAI.move([0, 13, 0, 0, 0, 0], [11, 12, 2, 0, 0, 0], 17, 17, 1))
