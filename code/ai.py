@@ -20,6 +20,13 @@ class ai:
             self.a_fin = a_fin
             self.b_fin = b_fin
 
+        def __str__(self):
+            print(f"a: {self.a}")
+            print(f"b: {self.b}")
+            print(f"afin: {self.a_fin}")
+            print(f"bfin: {self.b_fin}")
+            return ""
+
     # Kalah:
     #         b[5]  b[4]  b[3]  b[2]  b[1]  b[0]
     # b_fin                                         a_fin
@@ -60,13 +67,14 @@ class ai:
         # for d in [3, 5, 7]:  # You should try more
         #     f.write('depth = '+str(d)+'\n')
         #     t_start = time.time()
-        #     self.minimax(depth=d)
+        #     # self.minimax(depth=d)
         #     f.write(str(time.time()-t_start)+'\n')
         # f.close()
         # print(r)
         # res = r[random.randint(0, len(r)-1)]
         # print(res)
-        # # return res
+        # return res
+
         # # return r[random.randint(0, len(r)-1)]
         # # But remember in your final version you should choose only one depth according to your CPU speed (TA's is 3.4GHz)
         # # and remove timing code.
@@ -83,7 +91,7 @@ class ai:
         # append to time.txt so that you can see running time for all moves.
         f = open('time.txt', 'a')
         # Make sure to clean the file before each of your experiment
-        d = 10
+        d = 2
         f.write('depth = '+str(d)+'\n')
         t_start = time.time()
         a = self.minimax(depth=d)
@@ -92,10 +100,6 @@ class ai:
         res = r[a]
         print(f"a: {a} r[a]: {r[a]} r: {r}")
         return res
-        # return res
-        # return r[random.randint(0, len(r)-1)]
-        # But remember in your final version you should choose only one depth according to your CPU speed (TA's is 3.4GHz)
-        # and remove timing code.
 
     # calling function
 
@@ -111,7 +115,7 @@ class ai:
                 r.append(i)
 
         states = []
-        for i in range(len(r)):
+        for i in r:
             newState, isKalah = self.step(state, i)
             states.append((i, isKalah, newState))
 
@@ -120,9 +124,12 @@ class ai:
     def step(self, oldState: state, i):
         oldN = oldState.a[i]
         n = oldN
-        res = self.state(oldState.a, oldState.b,
+        res = self.state(oldState.a.copy(), oldState.b.copy(),
                          oldState.a_fin, oldState.b_fin)
 
+        # print(f"i: {i} n: {n}")
+        res.a[i] = 0
+        i += 1
         mod = i % 13
 
         while n > 0:
@@ -136,20 +143,25 @@ class ai:
             i += 1
             mod = i % 13
 
-        isKalah = False
         if mod == 6:
-            isKalah = True
+            return res, True
 
-        if mod < 6 and oldN < 13 and oldState.a[mod] == 0 or oldN == 13:
-            if (oldState.b[mod]) != 0:
-                sum = oldState.a[mod] + oldState.b[mod]
-                res.a_fin += sum
-                res.a[mod] = 0
-                res.b[mod] = 0
+        if mod < 6 and oldN < 13 and oldState.a[mod] == 0 and oldState.b[mod] != 0 or oldN == 13:
+            # print(
+            #     f"oldState.a: {oldState.a}  oldState.b: {oldState.b}  mod: {mod}  oldN: {oldN}")
 
-        return res, isKalah
+            sum = oldState.a[mod] + oldState.b[mod]
+            res.a_fin += sum
+            res.a[mod] = 0
+            res.b[mod] = 0
 
-    def Max_Value(self, state, alpha, beta, depth) -> tuple:
+        # print(f"res: {res}")
+
+        return res, False
+
+    def Max_Value(self, state, alpha, beta, depth):
+        print(
+            f"Max_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta}")
         if (self.Terminal_Test(state, depth)):
             return -1, self.utility(state, True)
         v = -math.inf
@@ -166,10 +178,12 @@ class ai:
                 return a, v
 
             alpha = max(alpha, v)
-
+        print("return -1")
         return -1, v
 
-    def Min_Value(self, state, alpha, beta, depth) -> tuple:
+    def Min_Value(self, state, alpha, beta, depth):
+        print(
+            f"Min_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta}")
         if (self.Terminal_Test(state, depth)):
             return -1, self.utility(state, False)
         v = math.inf
@@ -186,7 +200,7 @@ class ai:
                 return a, v
 
             beta = min(beta, v)
-
+        print("return -1")
         return -1, v
 
     def Terminal_Test(self, state: state, depth):
@@ -202,11 +216,11 @@ class ai:
         return False
 
     def utility(self, state: state, isMax):
-        if (state == None):
-            if isMax:
-                return -math.inf
-            else:
-                return math.inf
+        # if (state == None):
+        #     if isMax:
+        #         return -math.inf
+        #     else:
+        #         return math.inf
 
         if (state.a_fin > 36):
             return math.inf
@@ -214,4 +228,17 @@ class ai:
         if (state.b_fin > 36):
             return -math.inf
 
-        return sum(state.a) - sum(state.b) + state.a_fin * 2 - state.b_fin * 2
+        res = sum(state.a) - sum(state.b) + state.a_fin * 2 - state.b_fin * 2
+
+        return res
+
+
+if __name__ == "__main__":
+    myAI = ai()
+    print(myAI.move([6, 6, 6, 6, 6, 6], [6, 6, 6, 6, 6, 6], 0, 0, 1))
+    # myState = myAI.state([11, 0, 0, 1, 16, 1], [11, 0, 1, 3, 3, 1], 16, 8)
+
+    # successor = myAI.successor(myState)
+    # for s in successor:
+    #     print(s[2])
+    # print(myAI.successor(myState))
