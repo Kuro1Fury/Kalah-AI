@@ -91,7 +91,7 @@ class ai:
         # append to time.txt so that you can see running time for all moves.
         f = open('time.txt', 'a')
         # Make sure to clean the file before each of your experiment
-        d = 5
+        d = 6
         f.write('depth = '+str(d)+'\n')
         t_start = time.time()
         a = self.minimax(depth=d)
@@ -108,6 +108,8 @@ class ai:
         # example: doing nothing but wait 0.1*depth sec
         a, v = self.Max_Value(self.head, -math.inf, math.inf, depth)
         # print(f"v: {v}")
+        if a == -1:
+            return self.successorForA(self.head)[0][0]
         return a
 
     def successorForA(self, state: state):
