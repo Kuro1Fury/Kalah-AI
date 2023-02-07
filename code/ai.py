@@ -91,7 +91,7 @@ class ai:
         # append to time.txt so that you can see running time for all moves.
         f = open('time.txt', 'a')
         # Make sure to clean the file before each of your experiment
-        d = 6
+        d = 5
         f.write('depth = '+str(d)+'\n')
         t_start = time.time()
         a = self.minimax(depth=d)
@@ -284,4 +284,4 @@ if __name__ == "__main__":
 
     # print(myAI.move([0, 13, 0, 0, 0, 0], [11, 12, 2, 0, 0, 0], 17, 17, 1))
 
-    print(myAI.move([0, 13, 0, 0, 0, 0], [11, 12, 2, 0, 0, 0], 17, 17, 1))
+    print(myAI.move([0, 3, 0, 1, 0, 6], [1, 0, 1, 1, 4, 2], 18, 35, 1))
