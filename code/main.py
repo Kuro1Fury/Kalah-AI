@@ -36,9 +36,9 @@ class startUI(QtWidgets.QWidget):
         a_fin = 0
         b_fin = 0
         state = self.strState(False)
-        # url = 'http://kalahserver.cs.washington.edu/port.asmx?wsdl'
+        url = 'http://kalahserver.cs.washington.edu/port.asmx?wsdl'
         modulekey = "10jifn2eonvgp1o2ornfdlf-1230"
-        # client = suds.client.Client(url)
+        client = suds.client.Client(url)
         self.connect(self.allui.pbPlayHuman, QtCore.SIGNAL(
             "clicked()"), self.playHuman)
         self.connect(self.allui.pbSelectFile, QtCore.SIGNAL(

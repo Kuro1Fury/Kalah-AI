@@ -69,7 +69,7 @@ class ai:
 
         """ For actual gameplay """
         if t <= 1000:
-            d = 7
+            d = 6
         elif t <= 5000:
             d = 8
         else:
