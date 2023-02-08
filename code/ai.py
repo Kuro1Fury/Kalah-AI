@@ -52,72 +52,58 @@ class ai:
     # if elapsed_time * 1000 >= t:
     #    return result immediately
     def move(self, a, b, a_fin, b_fin, t):
+        """
+        Decide which step AI should take and return the index
+        """
         self.head = self.state(a, b, a_fin, b_fin)
 
-        # # For test only: return a random move
-        # r = []
-        # for i in range(6):
-        #     if a[i] != 0:
-        #         r.append(i)
-        # # To test the execution time, use time and file modules
-        # # In your experiments, you can try different depth, for example:
-        # # append to time.txt so that you can see running time for all moves.
-        # f = open('time.txt', 'a')
-        # # Make sure to clean the file before each of your experiment
-        # for d in [3, 5, 7]:  # You should try more
-        #     f.write('depth = '+str(d)+'\n')
-        #     t_start = time.time()
-        #     # self.minimax(depth=d)
-        #     f.write(str(time.time()-t_start)+'\n')
-        # f.close()
-        # print(r)
-        # res = r[random.randint(0, len(r)-1)]
-        # print(res)
-        # return res
-
-        # # return r[random.randint(0, len(r)-1)]
-        # # But remember in your final version you should choose only one depth according to your CPU speed (TA's is 3.4GHz)
-        # # and remove timing code.
-
-        # Comment all the code above and start your code here
-
-        # For test only: return a random move
-        r = []
-        for i in range(6):
-            if a[i] != 0:
-                r.append(i)
-        # To test the execution time, use time and file modules
-        # In your experiments, you can try different depth, for example:
-        # append to time.txt so that you can see running time for all moves.
         f = open('time.txt', 'a')
-        # Make sure to clean the file before each of your experiment
         d = 6
-        f.write('depth = '+str(d)+'\n')
-        t_start = time.time()
-        a = self.minimax(depth=d)
-        f.write(str(time.time()-t_start)+'\n')
+        res = -1
+        # Try depth of 6, 7, 8, and 9
+        for d in [6, 7, 8, 9]:
+            f.write('depth = '+str(d)+'\n')
+            t_start = time.time()
+            res = self.minimax(depth=d)
+            f.write(str(time.time()-t_start)+'\n')
         f.close()
-        print(f"a: {a} r: {r}")
-        res = a
 
         return res
 
-    # calling function
-
     def minimax(self, depth):
-        # example: doing nothing but wait 0.1*depth sec
+        """
+        Minmax Algorithm that decide action based on the depth
+
+        Args:
+            depth (int): Recursion depth
+
+        Returns:
+            int: the action AI should take, i.e. the index of field AI take
+        """
         a, v = self.Max_Value(self.head, -math.inf, math.inf, depth)
-        # print(f"v: {v}")
         if a == -1:
             return self.successorForA(self.head)[0][0]
         return a
 
     def successorForA(self, state: state):
+        """
+        Returns the successor of the current state for AI's side
+
+        Args:
+            state (state): Current Kalah state
+
+        Returns:
+            list: a list of current state's successors, which include
+            the successors' action index and if it is allowed to take the 
+            next step (for AI side)
+        """
+        # Construct a list of movable steps
         r = []
         for i in range(6):
             if state.a[i] != 0:
                 r.append(i)
 
+        # Traverse through all the moveable steps and generate successors as list
         states = []
         for i in r:
             newState, isKalah = self.step(state, i)
@@ -126,11 +112,24 @@ class ai:
         return states
 
     def successorForB(self, state: state):
+        """
+        Returns the successor of the current state for opponent's side
+
+        Args:
+            state (state): Current Kalah state
+
+        Returns:
+            list: a list of current state's successors, which include
+            the successors' action index and if it is allowed to take the 
+            next step (for opponent side)
+        """
+        # Construct a list of movable steps
         r = []
         for i in range(6):
             if state.b[::-1][i] != 0:
                 r.append(i)
 
+        # Traverse through all the moveable steps and generate successors as list
         states = []
         for i in r:
             newState, isKalah = self.step(self.state(
@@ -141,16 +140,26 @@ class ai:
         return states
 
     def step(self, oldState: state, i):
+        """
+        Calculate the next state by the given action
+
+        Args:
+            oldState (state): original state
+            i (int): the action index
+
+        Returns:
+            list, bool: the next state taken by the next step
+        """
         oldN = oldState.a[i]
         n = oldN
         res = self.state(oldState.a.copy(), oldState.b.copy(),
                          oldState.a_fin, oldState.b_fin)
 
-        # print(f"i: {i} n: {n}")
         res.a[i] = 0
         i += 1
         mod = -1
 
+        # Traverse through the new state and take steps
         while n > 0:
             mod = i % 13
             if mod == 6:
@@ -162,133 +171,167 @@ class ai:
             n -= 1
             i += 1
 
-        if mod < 6 and oldN < 13 and oldState.a[mod] == 0 and oldState.b[mod] != 0 or mod != 6 and oldN == 13:
-            # print(
-            #     f"oldState.a: {oldState.a}  oldState.b: {oldState.b}  mod: {mod}  oldN: {oldN}")
-
+        # Calculate situation if it is landed on a empty spot and take the
+        # opponent's point
+        if mod < 6 and oldN < 13 and oldState.a[mod] == 0 and oldState.b[mod] != 0\
+                or mod != 6 and oldN == 13:
             total = oldState.a[mod] + oldState.b[mod]
             res.a_fin += total
             res.a[mod] = 0
             res.b[mod] = 0
 
-        # print(f"res: {res}")
-
+        # Calculate situation if one side does not have available action
         if all(v == 0 for v in res.a):
             bSum = sum(res.b)
             res.b = [0, 0, 0, 0, 0, 0]
             res.b_fin += bSum
 
+        # Return true if landed on the kalah
         if mod == 6:
             return res, True
 
+        # Otherwise return false
         return res, False
 
     def Max_Value(self, state, alpha, beta, depth):
-        # print(
-        #     f"Max_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta} depth:{depth}")
+        """
+        Calculate max-value in the minimax algorithm with alpha-beta
+        pruning
+
+        Args:
+            state (state): current state
+            alpha (int): lower bound
+            beta (int): upper bound_
+            depth (int): remaining depth
+
+        Returns:
+            int, int: action index and calculated value
+        """
+        # Base case: Return the utility if it is a terminal
         if (self.Terminal_Test(state, depth)):
-            # print(
-            #     f"Max: a: {state.a} b:{state.b} utility: {self.utility(state, True)}")
-            return -1, self.utility(state, True)
+            return -1, self.utility(state)
         v = -math.inf
         maxA = -1
 
         for a, isKalah, s in self.successorForA(state):
             if not isKalah:
+                # If not hit kalah, call min value and decrease the value
                 act, val = self.Min_Value(s, alpha, beta, depth - 1)
+                # Update value and action
                 if val > v:
                     v = val
                     maxA = a
             else:
+                # If hit kalah, call the max value again
                 act, val = self.Max_Value(s, alpha, beta, depth)
+                # Update value and action
                 if val > v:
                     v = val
                     maxA = a
 
+            # return the current action and value if v is not smaller than alpha
             if v >= beta:
-                # print(f"Max a: {a} v:{v} beta:{beta}")
                 return a, v
 
+            # Update alpha
             alpha = max(alpha, v)
-        # print("return -1")
+
+        # Return the action and value
         return maxA, v
 
     def Min_Value(self, state, alpha, beta, depth):
-        # print(
-        #     f"Min_Value: a: {state.a} b:{state.b} alpha: {alpha} beta: {beta} depth:{depth}")
+        """
+        Calculate max-value in the minimax algorithm with alpha-beta
+        pruning
+
+        Args:
+            state (state): current state
+            alpha (int): lower bound
+            beta (int): upper bound_
+            depth (int): remaining depth
+
+        Returns:
+            int, int: action index and calculated value
+        """
+        # Base case: Return the utility if it is a terminal
         if (self.Terminal_Test(state, depth)):
-            # print(
-            #     f"Min: a: {state.a} b:{state.b} utility: {self.utility(state, False)}")
-            return -1, self.utility(state, False)
+            return -1, self.utility(state)
         v = math.inf
         maxA = -1
 
         for a, isKalah, s in self.successorForB(state):
             if not isKalah:
+                # If not hit kalah, call min value and decrease the value
                 act, val = self.Max_Value(s, alpha, beta, depth - 1)
+                # Update value and action
                 if val < v:
                     v = val
                     maxA = a
             else:
+                # If hit kalah, call the max value again
                 act, val = self.Min_Value(s, alpha, beta, depth)
+                # Update value and action
                 if val < v:
                     v = val
                     maxA = a
 
+            # return the current action and value if v is not smaller than alpha
             if v <= alpha:
-                # print(f"Min a: {a} v:{v}")
                 return a, v
 
+            # Update alpha
             beta = min(beta, v)
-        # print("return -1")
+
+        # Return the action and value
         return maxA, v
 
     def Terminal_Test(self, state: state, depth):
+        """
+        Return if the current state is a terminal
+
+        Args:
+            state (state): current state
+            depth (int): remaining depth
+
+        Returns:
+            bool: If the current state is a terminal
+        """
+        # If the remaining depth is zero, return true
         if (depth == 0):
             return True
 
+        # If there is no available action for either side, return true
         if all(v == 0 for v in state.a) or all(v == 0 for v in state.b):
             return True
 
-        if (state.a_fin > 36 or state.b_fin > 36):
+        # If the game is over, return true
+        if (state.a_fin > 36 or state.b_fin > 36
+                or (state.a_fin == 36 and state.b_fin == 36)):
             return True
 
+        # Otherwise, return false
         return False
 
-    def utility(self, state: state, isMax):
-        # if (state == None):
-        #     if isMax:
-        #         return -math.inf
-        #     else:
-        #         return math.inf
+    def utility(self, state: state):
+        """
+        Heuristic function for states
 
+        Args:
+            state (state): current state
+
+        Returns:
+            _type_: _description_
+        """
+        # If a wins, return infinity
         if (state.a_fin > 36):
             return math.inf
 
+        # If b wins, return -infinity
         if (state.b_fin > 36):
             return -math.inf
 
+        # Heuristic function
         res = sum(state.a) - sum(state.b) + \
             state.a_fin * 100 - state.b_fin * 100
 
         return res
-
-
-if __name__ == "__main__":
-    myAI = ai()
-    # print(myAI.move([0, 1, 0, 2, 12, 11], [1, 0, 2, 0, 13, 0], 16, 14, 1))
-    # myState = myAI.state([11, 0, 0, 1, 16, 1], [11, 0, 1, 3, 3, 1], 16, 8)
-
-    # successor = myAI.successor(myState)
-    # for s in successor:
-    #     print(s[2])
-
-    # myState = myAI.state([0, 13, 0, 0, 0, 0], [11, 12, 2, 0, 0, 0], 17, 17)
-    # print(myAI.successorForA(myState)[0][2].a,
-    #       myAI.successorForA(myState)[0][2].b)
-
-    #  print(myAI.Min_Value([0, 0, 0, 2, 12, 11], [1, 0, 0, 0, 13, 0], 16, 17))
-
-    # print(myAI.move([0, 13, 0, 0, 0, 0], [11, 12, 2, 0, 0, 0], 17, 17, 1))
-
-    print(myAI.move([0, 3, 0, 1, 0, 6], [1, 0, 1, 1, 4, 2], 18, 35, 1))
