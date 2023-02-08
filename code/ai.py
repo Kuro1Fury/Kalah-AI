@@ -1,3 +1,9 @@
+"""
+CSE 473 homework 3
+Allan Ji
+2/8/2023
+"""
+
 import math
 import time
 import random
@@ -58,15 +64,31 @@ class ai:
         self.head = self.state(a, b, a_fin, b_fin)
 
         f = open('time.txt', 'a')
-        d = 6
+        d = -1
         res = -1
-        # Try depth of 6, 7, 8, and 9
-        for d in [6, 7, 8, 9]:
-            f.write('depth = '+str(d)+'\n')
-            t_start = time.time()
-            res = self.minimax(depth=d)
-            f.write(str(time.time()-t_start)+'\n')
+
+        """ For actual gameplay """
+        if t <= 1000:
+            d = 7
+        elif t <= 5000:
+            d = 8
+        else:
+            d = 9
+
+        f.write('depth = '+str(d)+'\n')
+        t_start = time.time()
+        res = self.minimax(depth=d)
+        f.write(str(time.time()-t_start)+'\n')
         f.close()
+
+        """ Experiment part """
+        # Try depth of 6, 7, 8, and 9
+        # for d in [6, 7, 8, 9]:
+        #     f.write('depth = '+str(d)+'\n')
+        #     t_start = time.time()
+        #     res = self.minimax(depth=d)
+        #     f.write(str(time.time()-t_start)+'\n')
+        # f.close()
 
         return res
 
@@ -320,7 +342,7 @@ class ai:
             state (state): current state
 
         Returns:
-            _type_: _description_
+            int: the performance of the current state
         """
         # If a wins, return infinity
         if (state.a_fin > 36):
