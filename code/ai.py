@@ -162,19 +162,24 @@ class ai:
             n -= 1
             i += 1
 
-        if mod == 6:
-            return res, True
-
-        if mod < 6 and oldN < 13 and oldState.a[mod] == 0 and oldState.b[mod] != 0 or oldN == 13:
+        if mod < 6 and oldN < 13 and oldState.a[mod] == 0 and oldState.b[mod] != 0 or mod != 6 and oldN == 13:
             # print(
             #     f"oldState.a: {oldState.a}  oldState.b: {oldState.b}  mod: {mod}  oldN: {oldN}")
 
-            sum = oldState.a[mod] + oldState.b[mod]
-            res.a_fin += sum
+            total = oldState.a[mod] + oldState.b[mod]
+            res.a_fin += total
             res.a[mod] = 0
             res.b[mod] = 0
 
         # print(f"res: {res}")
+
+        if all(v == 0 for v in res.a):
+            bSum = sum(res.b)
+            res.b = [0, 0, 0, 0, 0, 0]
+            res.b_fin += bSum
+
+        if mod == 6:
+            return res, True
 
         return res, False
 
